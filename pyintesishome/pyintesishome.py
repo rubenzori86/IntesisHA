@@ -254,6 +254,8 @@ class IntesisHome():
             else:
                 self._devices[deviceid][INTESIS_MAP[uid]['name']] = value
                 _LOGGER.debug(self._devices)
+        else:
+            _LOGGER.info('Received status update for unknown UID %s to value %s',uid,value)
 
     def _update_rssi(self, deviceid, rssi):
         """Internal method to update the wireless signal strength."""
