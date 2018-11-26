@@ -11,16 +11,14 @@ from homeassistant.util import Throttle
 from datetime import timedelta
 from homeassistant.components.climate import ( ClimateDevice,
     PLATFORM_SCHEMA, ATTR_TARGET_TEMP_HIGH, ATTR_TARGET_TEMP_LOW,
-    ATTR_TEMPERATURE, ATTR_OPERATION_MODE, SUPPORT_TARGET_TEMPERATURE,
-    SUPPORT_TARGET_TEMPERATURE_HIGH, SUPPORT_TARGET_TEMPERATURE_LOW,
-    SUPPORT_OPERATION_MODE, SUPPORT_AWAY_MODE, SUPPORT_FAN_MODE)
+    ATTR_TEMPERATURE, ATTR_OPERATION_MODE, SUPPORT_OPERATION_MODE, SUPPORT_TARGET_TEMPERATURE, SUPPORT_FAN_MODE)
 from homeassistant.const import (TEMP_CELSIUS, CONF_SCAN_INTERVAL, STATE_UNKNOWN)
 
 DEPENDENCIES = ['intesishome']
 _LOGGER = logging.getLogger(__name__)
 STATE_FAN = 'Fan'
 STATE_HEAT = 'Heat'
-STATE_COOL = 'Cool'
+STATE_COOL = 'Cold'
 STATE_DRY = 'Dry'
 STATE_AUTO = 'Auto'
 STATE_QUIET = 'Quiet'
@@ -29,9 +27,7 @@ STATE_MEDIUM = 'Medium'
 STATE_HIGH = 'High'
 STATE_OFF = 'Off'
 
-SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE | SUPPORT_TARGET_TEMPERATURE_HIGH |
-                 SUPPORT_TARGET_TEMPERATURE_LOW | SUPPORT_OPERATION_MODE |
-                 SUPPORT_AWAY_MODE | SUPPORT_FAN_MODE)
+SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE | SUPPORT_OPERATION_MODE | SUPPORT_FAN_MODE
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_SCAN_INTERVAL):
@@ -54,6 +50,9 @@ except ImportError:
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the Nest thermostat."""
+    for deviceid, device in intesishome.get_devices().items():
+     _LOGGER.info('Setup deviceid: %s',repr(deviceid))
+     _LOGGER.info('Setup device: %s',repr(device))
     add_devices([IntesisAC(deviceid, device)
                  for deviceid, device in intesishome.get_devices().items()])
 
@@ -240,13 +239,13 @@ class IntesisAC(ClimateDevice):
     def icon(self):
         icon = None
         if self._current_operation == STATE_HEAT:
-            icon = 'mdi:fire'
+            icon = 'mdi:white-balance-sunny'
         elif self._current_operation == STATE_FAN:
             icon = 'mdi:fan'
         elif self._current_operation == STATE_DRY:
             icon = 'mdi:water-off'
         elif self._current_operation == STATE_COOL:
-            icon = 'mdi:snowflake'
+            icon = 'mdi:nest-thermostat'
         elif self._current_operation == STATE_AUTO:
             icon = 'mdi:cached'
         return icon
@@ -254,7 +253,7 @@ class IntesisAC(ClimateDevice):
     def update_callback(self):
         """Called when data is received by pyIntesishome"""
         _LOGGER.info("IntesisHome sent a status update.")
-        self.hass.async_add_job(self.async_schedule_update_ha_state,True)
+        self.hass.async_add_job(self.schedule_update_ha_state,True)
 
     @property
     def min_temp(self):
@@ -324,7 +323,7 @@ class IntesisAC(ClimateDevice):
     def is_away_mode_on(self):
         """Return if away mode is on."""
         return None
-    
+
     @property
     def supported_features(self):
         """Return the list of supported features."""
