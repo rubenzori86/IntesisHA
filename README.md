@@ -8,20 +8,22 @@ Tested on HomeAssistant 0.82.1
   - Add to your  <conf_dir>/configuration.yaml
   
 intesishome:
+
   username: !secret intesisuser
+  
   password: !secret intesispass
+  
 climate:
-  platform: intesishome
+platform: intesishome
+  
 
   - Create or edit your <conf_dir>/secrets.yaml with (mantain quotes):
-intesisuser: 'username'
-intesispass: 'password'
+  intesisuser: 'username'
+  intesispass: 'password'
 
   - upload to your <conf_dir>/custom_components folder (create if not exist)
   intesishome.py
   climate/intesishome.py
   
-  
-  
- Restart your homeassistant server and look for your climate.* device
+  Restart your homeassistant server and look for your climate.* device
 
